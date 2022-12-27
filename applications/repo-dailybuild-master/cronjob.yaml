@@ -1,0 +1,152 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scp-obsfiles-to-dailybuild
+  namespace: dailybuild
+spec:
+  schedule: "0 23 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 200
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: dailybuild
+        spec:
+          restartPolicy: OnFailure
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchExpressions: 
+                  - key: app
+                    values: 
+                    - openeuler-cn-north4-dailybuild-repo
+                    operator: In 
+          containers:
+          - name: scp-obsfiles-to-dailybuild
+            image: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/openeuler:20.03-lts-sp3
+            volumeMounts:
+            - mountPath: /repo/openeuler
+              name: data-volume
+            command: ["/bin/sh","-c"]
+            args:
+            - yum install -y sshpass openssh-clients;
+              echo "scp 22.09 22.03_lts_next branch";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_155)":"$(aarch64_source_22.09)"/*          "$(aarch64_dst_22.09)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_155)":"$(x86_source_22.09)"/*              "$(x86_dst_22.09)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_155)":"$(aarch64_source_22.03_lts_next)"/* "$(aarch64_dst_22.03_lts_next)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_155)":"$(x86_source_22.03_lts_next)"/*     "$(x86_dst_22.03_lts_next)";
+              echo "scp 22.09 22.03_lts_next branch done";
+              sleep 1;
+              echo "scp 22.03_lts 20.03_lts_sp1 20.03_lts_sp3 branch";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_32)":"$(aarch64_source_22.03_lts)"/*       "$(aarch64_dst_22.03_lts)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_32)":"$(x86_source_22.03_lts)"/*           "$(x86_dst_22.03_lts)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_32)":"$(aarch64_source_20.03_lts_sp1)"/*   "$(aarch64_dst_20.03_lts_sp1)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_32)":"$(x86_source_20.03_lts_sp1)"/*       "$(x86_dst_20.03_lts_sp1)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_32)":"$(aarch64_source_20.03_lts_sp3)"/*   "$(aarch64_dst_20.03_lts_sp3)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_32)":"$(x86_source_20.03_lts_sp3)"/*       "$(x86_dst_20.03_lts_sp3)";
+              echo "scp 22.03_lts 20.03_lts_sp1 20.03_lts_sp3 branch done";
+              sleep 1;
+              echo "scp master 22.03_lts_sp1 branch";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_95)":"$(aarch64_source_master)"/*           "$(aarch64_dst_master)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_95)":"$(x86_source_master)"/*               "$(x86_dst_master)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_95)":"$(aarch64_source_22.03_lts_sp1)"/*    "$(aarch64_dst_22.03_lts_sp1)";
+              sshpass -p "$(HOST_PASSWORD)" scp -o StrictHostKeyChecking=no -r "$(HOST_USER)"@"$(HOST_NAME_95)":"$(x86_source_22.03_lts_sp1)"/*        "$(x86_dst_22.03_lts_sp1)";
+              echo "scp master 22.03_lts_sp1 branch done";
+            env:
+            - name: HOST_USER
+              valueFrom:
+                secretKeyRef:
+                  key: host-user
+                  name: obs-server-host-secret
+            - name: HOST_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: host-password
+                  name: obs-server-host-secret
+            - name: HOST_NAME_155
+              valueFrom:
+                secretKeyRef:
+                  key: host-name-155
+                  name: obs-server-host-secret
+            - name: HOST_NAME_95
+              valueFrom:
+                secretKeyRef:
+                  key: host-name-95
+                  name: obs-server-host-secret
+            - name: HOST_NAME_32
+              valueFrom:
+                secretKeyRef:
+                  key: host-name-32
+                  name: obs-server-host-secret
+            - name: aarch64_source_22.09          
+              value: /srv/build/openEuler:22.09/standard_aarch64/aarch64/ceph
+            - name: x86_source_22.09             
+              value: /srv/build/openEuler:22.09/standard_x86_64/x86_64/ceph
+            - name: aarch64_source_22.03_lts_next 
+              value: /srv/build/openEuler:22.03:LTS:Next/standard_aarch64/aarch64/ceph
+            - name: x86_source_22.03_lts_next    
+              value: /srv/build/openEuler:22.03:LTS:Next/standard_x86_64/x86_64/ceph
+            - name: aarch64_source_22.03_lts      
+              value: /srv/build/openEuler:22.03:LTS/standard_aarch64/aarch64/ceph
+            - name: x86_source_22.03_lts         
+              value: /srv/build/openEuler:22.03:LTS/standard_x86_64/x86_64/ceph
+            - name: aarch64_source_20.03_lts_sp1  
+              value: /srv/build/openEuler:20.03:LTS:SP1/standard_aarch64/aarch64/ceph
+            - name: x86_source_20.03_lts_sp1      
+              value: /srv/build/openEuler:20.03:LTS:SP1/standard_x86_64/x86_64/ceph
+            - name: aarch64_source_20.03_lts_sp3  
+              value: /srv/build/openEuler:20.03:LTS:SP3/standard_aarch64/aarch64/ceph
+            - name: x86_source_20.03_lts_sp3      
+              value: /srv/build/openEuler:20.03:LTS:SP3/standard_x86_64/x86_64/ceph
+            - name: aarch64_source_master         
+              value: /srv/obs/build/openEuler:Mainline/standard_aarch64/aarch64/ceph
+            - name: x86_source_master            
+              value: /srv/obs/build/openEuler:Mainline/standard_x86_64/x86_64/ceph
+            - name: aarch64_source_22.03_lts_sp1  
+              value: /srv/obs/build/openEuler:22.03:LTS:SP1/standard_aarch64/aarch64/ceph
+            - name: x86_source_22.03_lts_sp1      
+              value: /srv/obs/build/openEuler:22.03:LTS:SP1/standard_x86_64/x86_64/ceph
+            - name : aarch64_dst_22.09           
+              value: /repo/openeuler/src-openeuler/openEuler-22.09/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_22.09                 
+              value: /repo/openeuler/src-openeuler/openEuler-22.09/0X080480000XC0000000/ceph/x86_64/
+            - name : aarch64_dst_22.03_lts_next   
+              value: /repo/openeuler/src-openeuler/openEuler-22.03-LTS-Next/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_22.03_lts_next        
+              value: /repo/openeuler/src-openeuler/openEuler-22.03-LTS-Next/0X080480000XC0000000/ceph/x86_64/
+            - name : aarch64_dst_22.03_lts        
+              value: /repo/openeuler/src-openeuler/openEuler-22.03-LTS/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_22.03_lts             
+              value: /repo/openeuler/src-openeuler/openEuler-22.03-LTS/0X080480000XC0000000/ceph/x86_64/
+            - name : aarch64_dst_20.03_lts_sp1    
+              value: /repo/openeuler/src-openeuler/openEuler-20.03-LTS-SP1/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_20.03_lts_sp1         
+              value: /repo/openeuler/src-openeuler/openEuler-20.03-LTS-SP1/0X080480000XC0000000/ceph/x86_64/
+            - name : aarch64_dst_20.03_lts_sp3   
+              value: /repo/openeuler/src-openeuler/openEuler-20.03-LTS-SP3/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_20.03_lts_sp3         
+              value: /repo/openeuler/src-openeuler/openEuler-20.03-LTS-SP3/0X080480000XC0000000/ceph/x86_64/
+            - name : aarch64_dst_master         
+              value: /repo/openeuler/src-openeuler/master/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_master                
+              value: /repo/openeuler/src-openeuler/master/0X080480000XC0000000/ceph/x86_64/
+            - name : aarch64_dst_22.03_lts_sp1   
+              value: /repo/openeuler/src-openeuler/openEuler-22.03-LTS-SP1/0X080480000XC0000000/ceph/aarch64/
+            - name: x86_dst_22.03_lts_sp1        
+              value: /repo/openeuler/src-openeuler/openEuler-22.03-LTS-SP1/0X080480000XC0000000/ceph/x86_64/
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 1000Mi
+              requests:
+                cpu: 500m
+                memory: 500Mi
+          volumes:
+          - name: data-volume
+            persistentVolumeClaim:
+              claimName: openeuler-data-volume
