@@ -13,12 +13,22 @@ spec:
           restartPolicy: OnFailure
           imagePullSecrets:
           - name: huawei-swr-image-pull-secret
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - patchwork
+                topologyKey: kubernetes.io/hostname
           containers:
             - name: patchwork
               image: swr.cn-north-4.myhuaweicloud.com/opensourceway/patchwork/patchwork:main-f3d54a3
               volumeMounts:
                 - mountPath: /home/patches
-                  name: patchwork-file-volume
+                  name: patchwork-disk-volume
               env:
                 - name: DATABASE_NAME
                   valueFrom:
@@ -157,9 +167,9 @@ spec:
                   python backup_log.py
               imagePullPolicy: IfNotPresent
           volumes:
-            - name: patchwork-file-volume
+            - name: patchwork-disk-volume
               persistentVolumeClaim:
-                claimName: patchwork-file-data
+                claimName: patchwork-share-disk-volume
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
@@ -176,12 +186,22 @@ spec:
           restartPolicy: OnFailure
           imagePullSecrets:
           - name: huawei-swr-image-pull-secret
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                    - patchwork
+                topologyKey: kubernetes.io/hostname
           containers:
             - name: patchwork
               image: swr.cn-north-4.myhuaweicloud.com/opensourceway/patchwork/patchwork:main-f3d54a3
               volumeMounts:
                 - mountPath: /home/patches
-                  name: patchwork-file-volume
+                  name: patchwork-disk-volume
               env:
                 - name: DATABASE_NAME
                   valueFrom:
@@ -317,6 +337,6 @@ spec:
                   python refresh_repos.py > /home/patches/refresh.log 2>&1
               imagePullPolicy: IfNotPresent
           volumes:
-            - name: patchwork-file-volume
+            - name: patchwork-disk-volume
               persistentVolumeClaim:
-                claimName: patchwork-file-data
+                claimName: patchwork-share-disk-volume

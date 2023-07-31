@@ -27,7 +27,7 @@ spec:
           image: swr.cn-north-4.myhuaweicloud.com/opensourceway/patchwork/patchwork:main-f3d54a3
           volumeMounts:
             - mountPath: /home/patches
-              name: patchwork-file-volume
+              name: patchwork-disk-volume
           resources:
             requests:
               cpu: 4000m
@@ -190,6 +190,6 @@ spec:
             tcpSocket:
               port: 8000
       volumes:
-        - name: patchwork-file-volume
+        - name: patchwork-disk-volume
           persistentVolumeClaim:
-            claimName: patchwork-file-data
+            claimName: patchwork-share-disk-volume
