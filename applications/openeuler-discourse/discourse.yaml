@@ -23,7 +23,7 @@ metadata:
   name: web-server
   namespace: discourse
 spec:
-  replicas: 2
+  replicas: 4
   strategy:
     rollingUpdate:
       maxSurge: 0
@@ -138,4 +138,4 @@ spec:
       volumes:
       - name: discourse-storage
         persistentVolumeClaim:
-          claimName: web-share-volume
+          claimName: discourse-share-volume-sfs-turbo

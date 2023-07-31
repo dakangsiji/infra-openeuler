@@ -6,9 +6,10 @@ resources:
 - redis-service.yaml
 - redis-statefulset.yaml
 - namespace.yaml
+- pvc.yaml
 namespace: source-gitlab
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
-- name: sameersbn/gitlab
+- name: swr.cn-north-4.myhuaweicloud.com/opensourceway/sameersbn/gitlab
   newTag: 14.8.2

@@ -4,8 +4,6 @@ resources:
 - service.yaml
 - ingress.yaml
 - secrets.yaml
-- purge-cache-job.yaml
-- configmap.yaml
 commonLabels:
   app: openeuler-website-v2
 commonAnnotations:
@@ -18,4 +16,4 @@ images:
 - name: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/openeuler-website-backend
   newTag: 4e873d57d82ccce861cb1661310326
 - name: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/openeuler-website-frontend
-  newTag: fa6f9348d93619c026968fa94fca4d114eb7cf9c
+  newTag: a6fec19be3ce1a0cf69601cf8b888a137027bd46

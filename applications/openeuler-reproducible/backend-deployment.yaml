@@ -27,4 +27,15 @@ spec:
             memory: 500Mi
           limits:
             cpu: 1000m
-            memory: 1000Mi
+            memory: 2000Mi
+        env:
+        - name: HOST_USER
+          valueFrom:
+            secretKeyRef:
+              name: openeuler-reproducible-secret
+              key: host_user
+        - name: HOST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openeuler-reproducible-secret
+              key: host_password

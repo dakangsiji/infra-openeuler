@@ -4,7 +4,7 @@ resources:
 - service.yaml
 - secrets.yaml
 - cronjob.yaml
-- pvc.yaml
+- ingress.yaml
 commonLabels:
   app: openeuler-meetingserver
   owner: liuqi
@@ -16,4 +16,4 @@ kind: Kustomization
 namespace: meetingserver
 images:
 - name: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/app-meeting-server
-  newTag: 7046ea0a8c2f56aa894a1a9ac77426973be65763
+  newTag: 6927f64f1b863001b024150a356e7f4eeefbe5c0

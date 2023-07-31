@@ -1,6 +1,7 @@
 resources:
 - https://github.com/opensourceways/compass-ci/deploy?ref=master
 - ingress.yaml
+- secret.yaml
 commonLabels:
   app: compass-ci
   owner: dukaitian
@@ -18,4 +19,4 @@ images:
   newName: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/compassciweb
   newTag: a1cd623b18ba642f0b7ccd8f561975a8ffc72c02.1620722472
 - name: swr.cn-north-4.myhuaweicloud.com/opensourceway/openeuler/compassciweb
-  newTag: ca319d93a11017b6b8c845c9a9b16d4025e3fcf8.1671615479
+  newTag: 2312f124b2ce5e81cf05009d2dff5f3cbd3aa848.1672278474
